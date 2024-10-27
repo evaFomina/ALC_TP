@@ -195,3 +195,35 @@ def triangularizarU(M):
 
     return numpy.block([[A[:1, :]], [A[1:, :1], B]])  # Retorna la matriz triangular superior
 
+#Defino la funcion metodoPotencia
+def metodoPotencia(A, v, k):
+    #En esta lista guardamos todos los vectores elevados a las potencias
+    vectores = []
+    for i in range(k):
+        #lo multiplicamos por la matriz y lo dividimos por su norma 2
+        Av = A @ v
+        v = Av / np.linalg.norm(Av, 2)
+        vectores.append(v)
+    return (v, vectores)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
