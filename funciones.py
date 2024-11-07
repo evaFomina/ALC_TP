@@ -15,7 +15,9 @@ Integrantes:
 
 #CONTENIDO RECICLADO DEL TP1
 
-import numpy
+import numpy 
+from numpy.linalg import matrix_power
+from scipy.linalg import norm
 
 def calcularLU(A):
     """
@@ -199,26 +201,91 @@ def triangularizarU(M):
 
 
 def metodoPotencia(A, v, k):
-    v = v / np.linalg.norm(v, 2)
+    v = v / numpy.linalg.norm(v, 2)
 
     for i in range(k):
         Av = A @ v
-        v = Av / np.linalg.norm(Av, 2)
+        v = Av / numpy.linalg.norm(Av, 2)
         l = v.T@A@v
     return (l)
 
 
 
 def metodoMonteCarlo(A,k):
-    avals = np.zeros(k)
+    avals = numpy.zeros(k)
 
     for i in range(k):
-        v = np.random.rand(A.shape[0])
+        v = numpy.random.rand(A.shape[0])
         l=metodoPotencia(A, v, k)
         avals[i]=l
     return avals.mean().round(4), avals.std().round(4)
 
 
+
+def seriePotencia(A, n):
+    normas = []
+    suma = numpy.eye(A.shape[0])
+    for i in range(1, n+1):
+        suma += matrix_power(A, i)
+        normas.append(norm(suma, 2))
+    return (suma, normas)
+
+
+
+def En (n):
+    """
+    Devuelve la matriz E(n)
+    
+    Parámetros:
+    n : entero
+        Tamaño deseado de la matriz E(n)
+        
+    Retorna: 
+    numpy.ndarray
+        Matriz cuadrada E(n) del tamaño indicado    
+    """
+    return numpy.eye(n)-(1/n)*numpy.ones((n,1))@numpy.ones((1,n))
+
+
+def hotelling(A,k,e):
+    """
+    Calcula los primeros k autovectores de la matriz A.
+    
+    Parámetros:
+    A : numpy.ndarray
+        Matriz cuadrada cuyos autovectores se desea encontrar.
+    k : entero
+        Cantidad de autovectores deseados. 
+    k : float64
+        Margen de error deseado.         
+    
+    Retorna:
+    list
+        Lista de autovectores.
+    list
+        lista de autovalores en el mismo orden.    
+    """    
+    x = numpy.random.rand(A.shape[0])
+    x = x / numpy.linalg.norm(x, 2)
+    
+    avecs = []
+    avals = []
+    
+    for i in range(k):
+        while True:
+            x_prev=x
+            x=A@x
+            x=x / numpy.linalg.norm(x, 2)
+            if numpy.linalg.norm(x-x_prev, 2)>(1-e):
+                break
+        
+        l=(x.T@A@x)/(x.T@x)
+        A=A-l*x@(x.T)
+             
+        avecs.append(x)
+        avals.append(l)
+        
+    return avecs,avals
 
 
 
