@@ -15,24 +15,23 @@ Integrantes:
 
 #CONTENIDO RECICLADO DEL TP1
 
-import numpy 
+import numpy as np
 from numpy.linalg import matrix_power
-from scipy.linalg import norm
 
 def calcularLU(A):
     """
     Calcula la descomposición LU de una matriz cuadrada A.
 
     Parámetros:
-    A : numpy.ndarray
+    A : np.ndarray
         Matriz cuadrada que se desea descomponer.
 
     Retorna:
-    L : numpy.ndarray
+    L : np.ndarray
         Matriz triangular inferior.
-    U : numpy.ndarray
+    U : np.ndarray
         Matriz triangular superior.
-    P : numpy.ndarray
+    P : np.ndarray
         Matriz de permutación utilizada en el proceso de descomposición.
     """
     m = A.shape[0]  # Número de filas de A
@@ -45,12 +44,12 @@ def calcularLU(A):
         print('Matriz no cuadrada')  # Verifica que la matriz sea cuadrada
         return
 
-    P = numpy.eye(n)  # Matriz de permutación inicial (identidad)
-    L = numpy.eye(n)  # Matriz triangular inferior inicial (identidad)
+    P = np.eye(n)  # Matriz de permutación inicial (identidad)
+    L = np.eye(n)  # Matriz triangular inferior inicial (identidad)
     L = L.astype(float)  # Asegura que L sea de tipo float
 
     for i in range(n):
-        Pj = numpy.eye(n)  # Matriz de permutación para la columna actual
+        Pj = np.eye(n)  # Matriz de permutación para la columna actual
 
         # Si el pivote es cero, se busca una fila para intercambiar
         if U[i, i] == 0:
@@ -81,15 +80,15 @@ def inversaLU(L, U, P):
     Calcula la inversa de una matriz utilizando la descomposición LU.
 
     Parámetros:
-    L : numpy.ndarray
+    L : np.ndarray
         Matriz triangular inferior.
-    U : numpy.ndarray
+    U : np.ndarray
         Matriz triangular superior.
-    P : numpy.ndarray
+    P : np.ndarray
         Matriz de permutación utilizada en el proceso de descomposición.
 
     Retorna:
-    numpy.ndarray
+    np.ndarray
         Matriz inversa de la matriz original.
     """
     return invertir(U) @ invertir(L) @ P  # Retorna la inversa calculada
@@ -99,15 +98,15 @@ def leontiefizar(A):
     Calcula la matriz Leontief a partir de la matriz insumo-producto A.
 
     Parámetros:
-    A : numpy.ndarray
+    A : np.ndarray
         Matriz insumo-producto que se desea transformar.
 
     Retorna:
-    numpy.ndarray
+    np.ndarray
         Matriz Leontief resultante.
     """
     n = A.shape[0]  # Número de sectores (filas de A)
-    I_A = numpy.eye(n) - A  # Matriz identidad menos A
+    I_A = np.eye(n) - A  # Matriz identidad menos A
     Low, Up, P = calcularLU(I_A)  # Descomposición LU de I - A
     return inversaLU(Low, Up, P)  # Retorna la inversa de la matriz resultante
 
@@ -120,17 +119,17 @@ def invertir(M):
     Calcula la inversa de una matriz M utilizando eliminación de Gauss.
 
     Parámetros:
-    M : numpy.ndarray
+    M : np.ndarray
         Matriz que se desea invertir.
 
     Retorna:
-    numpy.ndarray
+    np.ndarray
         Matriz inversa de M.
     """
-    A = numpy.copy(M)  # Copia de la matriz original
+    A = np.copy(M)  # Copia de la matriz original
     A = A.astype(float)  # Asegura que A sea de tipo float
 
-    A_aug = numpy.hstack((A, numpy.eye(A.shape[0])))  # Matriz aumentada
+    A_aug = np.hstack((A, np.eye(A.shape[0])))  # Matriz aumentada
     A_inv = sustHaciaAtras(triangularizarU(A_aug))  # Aplicar sustitución hacia atrás en U
 
     return A_inv  # Retorna la matriz inversa
@@ -140,11 +139,11 @@ def sustHaciaAtras(A_aug):
     Realiza la sustitución hacia atrás sobre una matriz aumentada.
 
     Parámetros:
-    A_aug : numpy.ndarray
+    A_aug : np.ndarray
         Matriz aumentada que se desea resolver.
 
     Retorna:
-    numpy.ndarray
+    np.ndarray
         Parte de la matriz que contiene la solución.
     """
     n = A_aug.shape[0]  # Número de filas
@@ -162,14 +161,14 @@ def triangularizarU(M):
     Transforma una matriz M en forma triangular superior.
 
     Parámetros:
-    M : numpy.ndarray
+    M : np.ndarray
         Matriz que se desea triangularizar.
 
     Retorna:
-    numpy.ndarray
+    np.ndarray
         Matriz triangular superior resultante.
     """
-    A = numpy.copy(M)  # Copia de la matriz original
+    A = np.copy(M)  # Copia de la matriz original
     A = A.astype(float)  # Asegura que A sea de tipo float
 
     f, c = A.shape  # Obtiene el número de filas y columnas
@@ -184,7 +183,7 @@ def triangularizarU(M):
 
     if i == f:
         B = triangularizarU(A[:, 1:])  # Recursión si no se encuentra fila no cero
-        return numpy.block([A[:, :1], B])  # Retorna matriz con columna inicial
+        return np.block([A[:, :1], B])  # Retorna matriz con columna inicial
 
     if i > 0:
         A[[0, i], :] = A[[i, 0], :]  # Intercambia filas si es necesario
@@ -194,28 +193,64 @@ def triangularizarU(M):
 
     B = triangularizarU(A[1:, 1:])  # Llama recursivamente para triangularizar el resto
 
-    return numpy.block([[A[:1, :]], [A[1:, :1], B]])  # Retorna la matriz triangular superior
+    return np.block([[A[:1, :]], [A[1:, :1], B]])  # Retorna la matriz triangular superior
 
 
 #CONTENIDO DESARROLLADO PARA TP2
 
 
 def metodoPotencia(A, v, k):
-    v = v / numpy.linalg.norm(v, 2)
+    """
+    Usa el método de la potencia para hallar el autovalor principal de A
+    
+    Parámetros:
+    A:  np.ndarray
+        Matriz cuadrada   
+    v:  np.ndarray
+        Vector semilla para el método de la potencia
+    k : entero
+        Cantidad de iteraciones deseadas 
+        
+    Retorna: 
+    float
+        Autovalor de A con mayor valor absoluto
+    """  
+    
+    v = v / np.linalg.norm(v, 2)
 
     for i in range(k):
         Av = A @ v
-        v = Av / numpy.linalg.norm(Av, 2)
+        v = Av / np.linalg.norm(Av, 2)
         l = v.T@A@v
     return (l)
 
 
 
 def metodoMonteCarlo(A,k):
-    avals = numpy.zeros(k)
+    """
+    Usa el método de Montecarlo para hallar un rango de valores para el autovalor principal de A
+    
+    Parámetros:
+    A:  np.ndarray
+        Matriz cuadrada   
+    k : entero
+        Cantidad de iteraciones deseadas 
+        
+    Retorna: 
+    float
+        Promedio de autovalor de A con mayor valor absoluto
+    float
+        Desvio estandar de autovalor de A con mayor valor absoluto   
+        
+    """     
+    
+    
+    
+    
+    avals = np.zeros(k)
 
     for i in range(k):
-        v = numpy.random.rand(A.shape[0])
+        v = np.random.rand(A.shape[0])
         l=metodoPotencia(A, v, k)
         avals[i]=l
     return avals.mean().round(4), avals.std().round(4)
@@ -223,11 +258,27 @@ def metodoMonteCarlo(A,k):
 
 
 def seriePotencia(A, n):
+    """
+    Desarrolla la matriz de Leontief de A como una serie de potencias de la matriz A. 
+    
+    Parámetros:
+    A:  np.ndarray
+        Matriz cuadrada   
+    n : entero
+        Potencia hasta la que se desea desarrollar 
+        
+    Retorna: 
+    np.ndarray
+        Matriz equivalente al desarrollo hasta n
+    list de floats
+        Normas de la serie desde 1 hasta n
+    """    
+       
     normas = []
-    suma = numpy.eye(A.shape[0])
+    suma = np.eye(A.shape[0])
     for i in range(1, n+1):
         suma += matrix_power(A, i)
-        normas.append(norm(suma, 2))
+        normas.append(np.linalg.norm(suma, 2))
     return (suma, normas)
 
 
@@ -241,23 +292,25 @@ def En (n):
         Tamaño deseado de la matriz E(n)
         
     Retorna: 
-    numpy.ndarray
+    np.ndarray
         Matriz cuadrada E(n) del tamaño indicado    
     """
-    return numpy.eye(n)-(1/n)*numpy.ones((n,1))@numpy.ones((1,n))
+    return np.eye(n)-(1/n)*np.outer(np.ones(n),np.ones(n))
 
 
-def hotelling(A,k,e):
+def hotelling(A, k, e, max_iter=1000):
     """
     Calcula los primeros k autovectores de la matriz A.
     
     Parámetros:
-    A : numpy.ndarray
+    A : np.ndarray
         Matriz cuadrada cuyos autovectores se desea encontrar.
-    k : entero
+    k : int
         Cantidad de autovectores deseados. 
-    k : float64
-        Margen de error deseado.         
+    e : float
+        Margen de error deseado.
+    max_iter : int
+        Máximo número de iteraciones para evitar bucles infinitos.         
     
     Retorna:
     list
@@ -265,44 +318,31 @@ def hotelling(A,k,e):
     list
         lista de autovalores en el mismo orden.    
     """    
-    x = numpy.random.rand(A.shape[0])
-    x = x / numpy.linalg.norm(x, 2)
+    x = np.random.rand(A.shape[0])
+    x = x / np.linalg.norm(x, 2)
     
     avecs = []
     avals = []
     
     for i in range(k):
+        iter_count = 0
         while True:
-            x_prev=x
-            x=A@x
-            x=x / numpy.linalg.norm(x, 2)
-            if numpy.linalg.norm(x-x_prev, 2)>(1-e):
+            x_prev = x
+            x = A @ x
+            x = x / np.linalg.norm(x, 2)
+            iter_count += 1
+
+            # Criterio de parada: o llega al margen de error deseado o frena a los 10.000 ciclos (esto evita bucles infinitos)
+            if np.linalg.norm(x - x_prev, 2) < e or iter_count >100000:
                 break
+
+        # Calculamos el autovalor correspondiente al autovector encontrado
+        l = (x.T @ A @ x) / (x.T @ x)
         
-        l=(x.T@A@x)/(x.T@x)
-        A=A-l*x@(x.T)
+        # Actualizamos la matriz A para eliminar la contribución del autovalor encontrado
+        A = A - l * np.outer(x, x)
              
         avecs.append(x)
         avals.append(l)
         
-    return avecs,avals
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return avecs, avals
